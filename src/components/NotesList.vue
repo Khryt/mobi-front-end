@@ -10,7 +10,9 @@
       <q-btn color="secondary" icon-right="note add" @click="showAddDiag=true">new</q-btn>
     </q-toolbar>
     <leftSlot slot="left"/>
-    <tabs :showAddDiag="showAddDiag" @addCancel="showAddDiag=false" @addOk="showAddDiag=false"/>
+    <div class="row justify-center">
+      <tabs class="self-center" :showAddDiag="showAddDiag" @addCancel="showAddDiag=false" @addOk="showAddDiag=false"/>
+    </div>
   </q-layout>
 </template>
 

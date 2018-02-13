@@ -101,9 +101,11 @@ export default {
   },
 
   created: function () {
-    this.URL = LocalStorage.get.item('URL')
-    if (typeof this.URL !== 'undefined' && this.URL !== '' && this.urlTest(this.URL)) this.showErr('', false)
-    else this.showErr('URL is invalid!', true)
+    if (LocalStorage.get.item('URL') !== null) {
+      this.URL = LocalStorage.get.item('URL')
+      if (this.URL !== '' && this.urlTest(this.URL)) this.showErr('', false)
+      else this.showErr('URL is invalid!', true)
+    }
   }
 }
 </script>

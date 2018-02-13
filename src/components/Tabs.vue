@@ -1,37 +1,38 @@
 <template>
-  <div class="layout-padding docs-tab-pane row justify-center">
-    <div style="width: 400px; max-width: 90vw;">
-      <q-tabs v-model="selectedTab" inverted align="justify">
-        <q-tab name="all" color="secondary" :count="notesCount" slot="title" icon="receipt" label="uncomplited" @click="showUnComplited()"/>
-        <q-tab name="comlited" color="purple" slot="title" icon="done all" label="Comlited" @click="showComplited()"/>
-        <!--q-tab name="add" color="amber" slot="title" icon="note add" label="Add new" @click="showAddDialog()"/-->
-      </q-tabs>
-      <q-scroll-area style="top: 152px; left: 5px; right: 5px; bottom: 5px;" class="fixed shadow-2">
-        <!--style="bottom: 5px; width: 400px; max-width: 90vw; max-height: 75vh;" class="shadow-1"-->
-        <!--style="top: 152px; left: 5px; right: 5px; bottom: 10px;" class="fixed shadow-1"-->
-        <q-list inset-separator>
-          <transition name="custom-classes-transition" enter-class="list-enter" enter-active-class="list-enter-active">
-            <q-item v-if="showEmptyMessage">
-              <q-item-main>
-                <q-item-tile label :color="colorEmpty">{{emptyMessage}}</q-item-tile>
-                <q-item-tile sublabel icon="insert emoticon" :color="colorEmpty"></q-item-tile>
-              </q-item-main>
-            </q-item>
-          </transition>
-          <!--transition-group name="custom-classes-transition" enter-class="list-enter" enter-active-class="list-enter-active" leave-to-class="list-leave-to" leave-active-class="list-leave-active"-->
-            <q-item v-for="note in allNotes" :key="note._id" v-if="note.complit===complitFilter" multiline>
-              <q-item-main>
-                <q-item-tile label>{{note.title}}</q-item-tile>
-                <q-item-tile sublabel lines="2">{{note.text}}</q-item-tile>
-              </q-item-main>
-              <q-item-side right icon="more_vert">
-                <tabsPopover :id="note._id" :doneLabel="popoverLabel" @done="noteDone" @edit="showEditDialog" @delete="noteDelete"/>
-              </q-item-side>
-            </q-item>
-          <!--/transition-group--> 
-        </q-list>
-      </q-scroll-area>
-    </div>
+  <div style="width: 500px; max-width: 90vw;">
+    <q-tabs v-model="selectedTab" inverted align="justify">
+      <q-tab name="all" color="secondary" :count="notesCount" slot="title" icon="receipt" label="uncomplited" @click="showUnComplited()"/>
+      <q-tab name="comlited" color="purple" slot="title" icon="done all" label="Comlited" @click="showComplited()"/>
+      <!--q-tab name="add" color="amber" slot="title" icon="note add" label="Add new" @click="showAddDialog()"/-->
+    </q-tabs>
+    <q-scroll-area style="max-width: 90vw; max-height: 79vh; height: 4000px;" class="shadow-1">
+      <!--style="bottom: 5px; width: 400px; max-width: 90vw; max-height: 75vh;" class="shadow-1"-->
+      <!--style="top: 152px; left: 5px; right: 5px; bottom: 10px;" class="fixed shadow-1"-->
+      <q-list inset-separator>
+        <transition name="custom-classes-transition" enter-class="list-enter" enter-active-class="list-enter-active">
+          <q-item v-show="showEmptyMessage">
+            <q-item-main>
+              <q-item-tile label :color="colorEmpty">{{emptyMessage}}</q-item-tile>
+              <q-item-tile sublabel icon="insert emoticon" :color="colorEmpty"></q-item-tile>
+            </q-item-main>
+          </q-item>
+        </transition>
+        <!--transition-group name="custom-classes-transition" enter-class="list-enter" enter-active-class="list-enter-active" leave-to-class="list-leave-to" leave-active-class="list-leave-active"-->
+          <q-item v-for="note in allNotes" :key="note._id" v-if="note.complit===complitFilter" multiline>
+            <q-item-main>
+              <q-item-tile label>{{note.title}}</q-item-tile>
+              <q-item-tile sublabel lines="2">{{note.text}}</q-item-tile>
+            </q-item-main>
+            <q-item-side right icon="more_vert">
+              <tabsPopover :id="note._id" :doneLabel="popoverLabel" @done="noteDone" @edit="showEditDialog" @delete="noteDelete"/>
+            </q-item-side>
+          </q-item>
+        <!--/transition-group--> 
+      </q-list>
+    </q-scroll-area>
+    <q-inner-loading :visible="showLoader">
+        <q-spinner-gears size="100px" color="secondary"></q-spinner-gears>
+    </q-inner-loading>
   </div>
 </template>
 
@@ -50,6 +51,8 @@ import {
   QItemTile,
   QPopover,
   QScrollArea,
+  QInnerLoading,
+  QSpinnerGears,
   LocalStorage,
   Toast
 } from 'quasar'
@@ -72,6 +75,8 @@ export default {
     QItemTile,
     QPopover,
     QScrollArea,
+    QInnerLoading,
+    QSpinnerGears,
     tabsPopover
   },
   data () {
@@ -85,6 +90,7 @@ export default {
       notesCount: 0,
       showEmptyMessage: false,
       readNext: false,
+      showLoader: false,
       notes: [],
       allNotes: [],
       editNote: {},
@@ -112,6 +118,7 @@ export default {
     },
 
     getAllNotes: function () {
+      this.showLoader = true
       this.$http
         .get(
           // GET /all notes
@@ -123,6 +130,7 @@ export default {
               this.allNotes = response.data
               this.notesCount = this.allNotes.filter(obj => obj.complit === 'F').length
               this.showEmptyListMessage()
+              this.showLoader = false
             }
             else {
               alert('Server send this error:' + response.data.error)
@@ -190,7 +198,6 @@ export default {
       this.allNotes[index].title = this.editNote.title
       this.allNotes[index].text = this.editNote.body // !!
       this.showActualNotesList()
-
       this.$http
         .put(this.serverUrl + '/note/' + this.editNote.id, {
           title: this.editNote.title,

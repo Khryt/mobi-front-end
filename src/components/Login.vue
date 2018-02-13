@@ -5,26 +5,31 @@
         Notes
       </q-toolbar-title>
     </q-toolbar>
-    <q-card style="position: relative; top:150px;">
-      <q-card-main v-if="showLogin">
-        <q-field helper="test">
-          <q-input v-model="name" float-label="User name" :error="nameError" :class="{ 'animate-blink': error }"/>
-        </q-field>
-        <q-field helper="test">
-          <q-input v-model="pwd" type="password" :error="pwdError" :class="{ 'animate-blink': error }" float-label="Password"/>
-        </q-field>
-        <q-btn loader color="primary"  @click="login">
+    <div class="window-width row justify-center items-center" style="height: calc(100vh - 90px)">
+      <q-card style="width: 90vw !important" >
+        <q-card-title>
           Login
-          <span slot="loading">
-            <q-spinner-hourglass class="on-left" />
-            Loading...
-          </span>
-        </q-btn>
-      </q-card-main>
-      <q-card-main v-if="showSettings">
-        <settings @testIsOk="loginOn(true)"/>
-      </q-card-main>
-    </q-card>
+        </q-card-title>
+        <q-card-main v-if="showLogin">
+          <q-field helper="test">
+            <q-input v-model="name" float-label="User name" :error="nameError" :class="{ 'animate-blink': error }"/>
+          </q-field>
+          <q-field helper="test">
+            <q-input v-model="pwd" type="password" :error="pwdError" :class="{ 'animate-blink': error }" float-label="Password"/>
+          </q-field>
+          <q-btn loader color="primary"  @click="login">
+            Login
+            <span slot="loading">
+              <q-spinner-hourglass class="on-left" />
+              Loading...
+            </span>
+          </q-btn>
+        </q-card-main>
+        <q-card-main v-if="showSettings">
+          <settings @testIsOk="loginOn(true)"/>
+        </q-card-main>
+      </q-card>
+    </div>
   </q-layout>
 </template>
 
